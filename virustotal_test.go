@@ -3,6 +3,7 @@ package main_test
 import (
 	"testing"
 
+	ar "github.com/m-mizutani/AlertResponder/lib"
 	main "github.com/m-mizutani/VirusTotalInspector"
 
 	"github.com/stretchr/testify/assert"
@@ -15,7 +16,7 @@ type VtTestConfig struct {
 
 func TestVirusTotalFile(t *testing.T) {
 	var cfg VtTestConfig
-	LoadTestConfig(&cfg)
+	ar.LoadTestConfig(&cfg)
 
 	vt := main.NewVirusTotal(cfg.VirusTotalToken)
 	report, err := vt.QueryFile("52d3df0ed60c46f336c131bf2ca454f73bafdc4b04dfa2aea80746f5ba9e6d1c")
@@ -28,7 +29,7 @@ func TestVirusTotalFile(t *testing.T) {
 
 func TestVirusTotalBulkFileQuery(t *testing.T) {
 	var cfg VtTestConfig
-	LoadTestConfig(&cfg)
+	ar.LoadTestConfig(&cfg)
 
 	vt := main.NewVirusTotal(cfg.VirusTotalToken)
 	hvList := []string{
@@ -43,7 +44,7 @@ func TestVirusTotalBulkFileQuery(t *testing.T) {
 
 func TestVirusTotalIPAddr(t *testing.T) {
 	var cfg VtTestConfig
-	LoadTestConfig(&cfg)
+	ar.LoadTestConfig(&cfg)
 
 	vt := main.NewVirusTotal(cfg.VirusTotalToken)
 	report, err := vt.QueryIPAddr("195.22.26.248")
