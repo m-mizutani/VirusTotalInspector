@@ -32,7 +32,7 @@ func createMalwareCache(hashList []string, vt *VirusTotal) (malwareCache, error)
 	return vd, nil
 }
 
-func traceMalware(report VirusTotalIPAddrReport, vt *VirusTotal) ([]ar.ReportMalware, []ar.Section, error) {
+func traceMalware(report VirusTotalIPAddrReport, vt *VirusTotal) ([]ar.ReportMalware, error) {
 	mwTemp := []ar.ReportMalware{}
 	mwReport := []ar.ReportMalware{}
 	hashList := []string{}
@@ -77,16 +77,7 @@ func traceMalware(report VirusTotalIPAddrReport, vt *VirusTotal) ([]ar.ReportMal
 
 	cache, err := createMalwareCache(hashList, vt)
 	if err != nil {
-		return nil, nil, err
-	}
-
-	table := ar.NewTable()
-	table.Head.AddItem("Datetime")
-	table.Head.AddItem("Ratio")
-	table.Head.AddItem("Type")
-
-	for _, vendor := range targetVendors {
-		table.Head.AddItem(vendor)
+		return nil, err
 	}
 
 	for _, r := range mwReport {
@@ -96,33 +87,84 @@ func traceMalware(report VirusTotalIPAddrReport, vt *VirusTotal) ([]ar.ReportMal
 			continue
 		}
 
-		row := ar.NewRow()
-		row.AddItem(fmt.Sprintf("[%s](https://www.virustotal.com/ja/file/%s/analysis/)", r.Timestamp, r.SHA256))
-		row.AddItem(fmt.Sprintf("%d/%d", scanResult.Positives, scanResult.Total))
-		row.AddItem(r.Relation)
-
 		for _, vendor := range targetVendors {
 			scan, ok := scanResult.Scans[vendor]
-			scanReport := ar.ReportMalwareScan{Vendor: vendor}
+			scanReport := ar.ReportMalwareScan{Vendor: vendor, Source: "VirusTotal"}
 
-			if !ok || !scan.Detected {
-				row.AddItem("")
-			} else {
-				row.AddItem(scan.Result)
+			if ok && scan.Detected {
 				scanReport.Positive = true
 				scanReport.Name = scan.Result
 			}
 
 			r.Scans = append(r.Scans, ar.ReportMalwareScan{})
 		}
-
-		table.Append(row)
 	}
 
-	section := ar.NewSection("Related malware")
-	section.Append(&table)
+	return mwReport, nil
+}
 
-	return mwReport, []ar.Section{section}, nil
+func traceDomain(resolutions []vtResolution) []ar.ReportDomain {
+	const maxItemCount = 5
+	tmp := []ar.ReportDomain{}
+	domainReports := []ar.ReportDomain{}
+
+	for _, resolution := range resolutions {
+		t, err := time.Parse("2006-01-02 15:04:05", resolution.LastResolved)
+		if err != nil {
+			log.Println("Error: Invalid time format of VT result, ", resolution)
+			continue
+		}
+
+		tmp = append(tmp, ar.ReportDomain{
+			Name:      resolution.HostName,
+			Timestamp: t,
+			Source:    "VirusTotal",
+		})
+	}
+
+	sort.Slice(tmp, func(i, j int) bool { // Reverse sort
+		return tmp[i].Timestamp.After(tmp[j].Timestamp)
+	})
+
+	for i := 0; i < maxItemCount && i < len(tmp); i++ {
+		domainReports = append(domainReports, tmp[i])
+	}
+
+	return domainReports
+}
+
+func traceURL(urls []vtURL) []ar.ReportURL {
+	const maxItemCount = 5
+	tmp := []ar.ReportURL{}
+	urlReports := []ar.ReportURL{}
+
+	for _, url := range urls {
+		if url.Positives == 0 {
+			continue
+		}
+
+		t, err := time.Parse("2006-01-02 15:04:05", url.ScanDate)
+		if err != nil {
+			log.Println("Error: Invalid time format of VT result, ", url)
+			continue
+		}
+
+		tmp = append(tmp, ar.ReportURL{
+			URL:       url.URL,
+			Timestamp: t,
+			Source:    "VirusTotal",
+		})
+	}
+
+	sort.Slice(tmp, func(i, j int) bool { // Reverse sort
+		return tmp[i].Timestamp.After(tmp[j].Timestamp)
+	})
+
+	for i := 0; i < maxItemCount && i < len(tmp); i++ {
+		urlReports = append(urlReports, tmp[i])
+	}
+
+	return urlReports
 }
 
 func SpyRemoteIPAddr(ipaddr, token string) (*ar.ReportPage, error) {
@@ -133,18 +175,21 @@ func SpyRemoteIPAddr(ipaddr, token string) (*ar.ReportPage, error) {
 		return nil, err
 	}
 
-	mwReports, mwSections, err := traceMalware(report, &vt)
+	mwReports, err := traceMalware(report, &vt)
 	if err != nil {
 		return nil, err
 	}
 
-	page := ar.NewReportPage()
-	page.Title = fmt.Sprintf("VirusTotal Report of %s", ipaddr)
-	page.AppendSections(mwSections)
-	page.RemoteHost = &ar.ReportRemoteHost{
+	remote := ar.ReportRemoteHost{
 		IPAddr:         []string{ipaddr},
 		RelatedMalware: mwReports,
+		RelatedDomains: traceDomain(report.Resolutions),
+		RelatedURLs:    traceURL(report.DetectedURLs),
 	}
+
+	page := ar.NewReportPage()
+	page.Title = fmt.Sprintf("VirusTotal Report of %s", ipaddr)
+	page.RemoteHost = append(page.RemoteHost, remote)
 
 	return &page, nil
 }
