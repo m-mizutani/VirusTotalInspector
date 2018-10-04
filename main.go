@@ -80,7 +80,8 @@ func traceMalware(report VirusTotalIPAddrReport, vt *VirusTotal) ([]ar.ReportMal
 		return nil, err
 	}
 
-	for _, r := range mwReport {
+	for i := 0; i < len(mwReport); i++ {
+		r := &mwReport[i]
 		scanResult, ok := cache[r.SHA256]
 		if !ok {
 			log.Println("No scan result:", r.SHA256)
@@ -96,7 +97,7 @@ func traceMalware(report VirusTotalIPAddrReport, vt *VirusTotal) ([]ar.ReportMal
 				scanReport.Name = scan.Result
 			}
 
-			r.Scans = append(r.Scans, ar.ReportMalwareScan{})
+			r.Scans = append(r.Scans, scanReport)
 		}
 	}
 
