@@ -110,6 +110,5 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - secretsmanager:GetSecretValue
-                  - secretsmanager:DescribeSecret
                 Resource:
                   - Ref: SecretArn
