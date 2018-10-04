@@ -1,12 +1,7 @@
 package main_test
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
 	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,44 +17,9 @@ type TestConfig struct {
 	SecretArn string `json:"secret_arn"`
 }
 
-// LoadTestConfig provides config data from "test.json".
-// The method searches "test.json" toward upper directory
-func LoadTestConfig(cfg interface{}) {
-	cwd := os.Getenv("PWD")
-	var fp *os.File
-	var err error
-
-	for cwd != "/" {
-		cfgPath := filepath.Join(cwd, "test.json")
-
-		cwd, _ = filepath.Split(strings.TrimRight(cwd, string(filepath.Separator)))
-
-		fp, err = os.Open(cfgPath)
-		if err == nil {
-			break
-		}
-	}
-
-	if fp == nil {
-		log.Fatal("test.json is not found")
-	}
-
-	rawData, err := ioutil.ReadAll(fp)
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(rawData, cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	return
-}
-
 func TestAttributes(t *testing.T) {
 	var cfg TestConfig
-	LoadTestConfig(&cfg)
+	ar.LoadTestConfig(&cfg)
 
 	task := ar.Task{
 		ReportID: ar.NewReportID(),
