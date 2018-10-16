@@ -2,17 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:9228eee3319f061278c7f8ab297b57332e7e02e0b6dd92c0cfe2612590ed6c8a"
-  name = "ghe.ckpd.co/security/slam-alert-responder"
-  packages = [
-    "lib",
-    "tasks/spy-remote-ipaddr",
-  ]
-  pruneopts = "UT"
-  revision = "bded5b7f01f8e20987938d88de41118c5a798acf"
-
-[[projects]]
   digest = "1:014e79cf5c422dd0547a87bde33c7f7b3cd29116a96fac8897c7e50f18531dea"
   name = "github.com/aws/aws-lambda-go"
   packages = [
@@ -26,7 +15,7 @@
   version = "v1.6.0"
 
 [[projects]]
-  digest = "1:959a7507546f35b3e5fe9ff270d2f4b7fd7ea83202c6cbd7103fbeba239ab9fd"
+  digest = "1:23567b094400f3b915445a395e74dff352fa55414b1fbaf0ae794f2b6abe4c0d"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -60,15 +49,14 @@
     "service/dynamodb",
     "service/dynamodb/dynamodbattribute",
     "service/dynamodb/dynamodbiface",
-    "service/kms",
     "service/secretsmanager",
     "service/sfn",
     "service/sns",
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "cfcda8304585604aabf1f7f8f7ce67b55029d0ca"
-  version = "v1.15.47"
+  revision = "dd947f47decb37a7c3bee72501bfc790701ab5ad"
+  version = "v1.15.50"
 
 [[projects]]
   digest = "1:2209584c0f7c9b68c23374e659357ab546e1b70eec2761f03280f69a8fd23d77"
@@ -122,11 +110,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:041e92b4f205fa3e7ed4ce97df701e21aa0e0138eaf7d4e68eeb843dc631fcde"
+  digest = "1:20118a76d4a1d33097b68b4baaa31a68a1fd58b8999bbadd39493e5856404bd5"
   name = "github.com/m-mizutani/AlertResponder"
   packages = ["lib"]
   pruneopts = "UT"
-  revision = "9dacf227b7e325f6f740b9b22895c31d4ace21fa"
+  revision = "3e697ef361a5c36b210f2e4cbb9b46e2a288e22c"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
@@ -185,26 +173,20 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "f5e5bdd778241bfefa8627f7124c39cd6ad8d74f"
+  revision = "146acd28ed5894421fb5aac80ca93bc1b1f46f87"
 
 [[projects]]
   branch = "master"
-  digest = "1:e2ced6fdf654069e8713c96012275fbd245381673d53e8c8ace640b28441a28b"
+  digest = "1:c2789211d4035eb0843b85958ecf7cb4a5ea91c2d4decee652c94ce898e433cb"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "e4b3c5e9061176387e7cea65e4dc5853801f3fb7"
+  revision = "4497e2df6f9e69048a54498c7affbbec3294ad47"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "ghe.ckpd.co/security/slam-alert-responder/lib",
-    "ghe.ckpd.co/security/slam-alert-responder/tasks/spy-remote-ipaddr",
-    "github.com/aws/aws-lambda-go/lambda",
-    "github.com/aws/aws-sdk-go/aws",
-    "github.com/aws/aws-sdk-go/aws/session",
-    "github.com/aws/aws-sdk-go/service/secretsmanager",
     "github.com/m-mizutani/AlertResponder/lib",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",

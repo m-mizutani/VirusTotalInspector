@@ -195,6 +195,16 @@ func SpyRemoteIPAddr(ipaddr, token string) (*ar.ReportPage, error) {
 	return &page, nil
 }
 
+func sliceHasWord(arr []string, target string) bool {
+	for _, s := range arr {
+		if s == target {
+			return true
+		}
+	}
+
+	return false
+}
+
 func SpyRemoteHost(task ar.Task) (*ar.ReportPage, error) {
 	ar.Dump("task", task)
 
@@ -204,7 +214,7 @@ func SpyRemoteHost(task ar.Task) (*ar.ReportPage, error) {
 		return nil, errors.Wrap(err, "Fail to get VT secrets")
 	}
 
-	if task.Attr.Context == "remote" && task.Attr.Type == "ipaddr" {
+	if sliceHasWord(task.Attr.Context, "remote") && task.Attr.Type == "ipaddr" {
 		return SpyRemoteIPAddr(task.Attr.Value, values.VirusTotalToken)
 	}
 
