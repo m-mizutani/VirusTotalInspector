@@ -4,9 +4,11 @@ Parameters:
   LambdaRoleArn:
     Type: String
     Default: ""
-  TaskStreamArn:
+  TaskNotificationArn:
     Type: String
-  ReportDataArn:
+  SubmitterName:
+    Type: String
+  SubmitterRegion:
     Type: String
   SecretArn:
     Type: String
@@ -53,18 +55,18 @@ Resources:
         Fn::If: [ LambdaRoleRequired, {"Fn::GetAtt": LambdaRole.Arn}, {Ref: LambdaRoleArn} ]
       Environment:
         Variables:
-          REPORT_DATA:
-            Ref: ReportDataArn
+          SUBMITTER_NAME:
+            Ref: SubmitterName
+          SUBMITTER_REGION:
+            Ref: SubmitterRegion
           SECRET_ARN:
             Ref: SecretArn
       Events:
-        TaskStream:
-          Type: Kinesis
+        NotifyTopic:
+          Type: SNS
           Properties:
-            Stream:
-              Ref: TaskStreamArn
-            StartingPosition: TRIM_HORIZON
-            BatchSize: 10
+            Topic:
+              Ref: TaskNotificationArn
 
   # --------------------------------------------------------
   # IAM Roles
@@ -87,26 +89,6 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Effect: "Allow"
-                Action:
-                  - dynamodb:PutItem
-                  - dynamodb:DeleteItem
-                  - dynamodb:GetItem
-                  - dynamodb:Query
-                  - dynamodb:Scan
-                  - dynamodb:UpdateItem
-                Resource:
-                  - Ref: ReportDataArn
-                  - Fn::Sub: [ "${TableArn}/index/*", { TableArn: { "Ref": ReportDataArn } } ]
-                  - Fn::GetAtt: CacheTable.Arn
-                  - Fn::Sub: [ "${TableArn}/index/*", { TableArn: { "Fn::GetAtt": CacheTable.Arn } } ]
-              - Effect: "Allow"
-                Action:
-                  - kinesis:DescribeStream
-                  - kinesis:GetShardIterator
-                  - kinesis:GetRecords
-                Resource:
-                  - Ref: TaskStreamArn
               - Effect: "Allow"
                 Action:
                   - secretsmanager:GetSecretValue

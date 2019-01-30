@@ -181,7 +181,7 @@ func SpyRemoteIPAddr(ipaddr, token string) (*ar.ReportPage, error) {
 		return nil, err
 	}
 
-	remote := ar.ReportRemoteHost{
+	remote := ar.ReportOpponentHost{
 		IPAddr:         []string{ipaddr},
 		RelatedMalware: mwReports,
 		RelatedDomains: traceDomain(report.Resolutions),
@@ -190,7 +190,7 @@ func SpyRemoteIPAddr(ipaddr, token string) (*ar.ReportPage, error) {
 
 	page := ar.NewReportPage()
 	page.Title = fmt.Sprintf("VirusTotal Report of %s", ipaddr)
-	page.RemoteHost = append(page.RemoteHost, remote)
+	page.OpponentHosts = append(page.OpponentHosts, remote)
 
 	return &page, nil
 }
@@ -206,7 +206,7 @@ func sliceHasWord(arr []string, target string) bool {
 }
 
 func SpyRemoteHost(task ar.Task) (*ar.ReportPage, error) {
-	ar.Dump("task", task)
+	// ar.Dump("task", task)
 
 	var values SecretValues
 	err := ar.GetSecretValues(os.Getenv("SECRET_ARN"), &values)
@@ -222,6 +222,7 @@ func SpyRemoteHost(task ar.Task) (*ar.ReportPage, error) {
 }
 
 func main() {
-	tableName := os.Getenv("REPORT_DATA")
-	ar.Inspect(SpyRemoteHost, tableName)
+	funcName := os.Getenv("SUBMITTER_NAME")
+	funcRegion := os.Getenv("SUBMITTER_REGION")
+	ar.Inspect(SpyRemoteHost, funcName, funcRegion)
 }
